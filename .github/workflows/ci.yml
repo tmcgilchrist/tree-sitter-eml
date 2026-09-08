@@ -10,6 +10,8 @@ on:
       - test/**
       - bindings/**
       - binding.gyp
+      - Makefile
+      - package.json
       - .github/workflows/ci.yml
   pull_request:
     paths:
@@ -19,9 +21,9 @@ on:
       - test/**
       - bindings/**
       - binding.gyp
-      - .github/workflows/ci.yml
       - Makefile
       - package.json
+      - .github/workflows/ci.yml
   workflow_dispatch:
 
 concurrency:
