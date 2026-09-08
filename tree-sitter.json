@@ -14,8 +14,8 @@
       "injections": "queries/injections.scm"
     },
     {
-      "name": "eml-reason",
-      "camelcase": "EmlReason",
+      "name": "eml",
+      "camelcase": "Eml",
       "scope": "source.eml.reason",
       "path": ".",
       "file-types": [

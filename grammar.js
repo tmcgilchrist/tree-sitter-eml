@@ -8,7 +8,7 @@
  * recognises the template skeleton and leaves the OCaml and HTML content
  * opaque, so that editors inject `ocaml` and `html` into it.  The directive
  * rules below (`code`, and the `seq(open, code, close)` shape) are adapted
- * from `tree-sitter/tree-sitter-embedded-template`, MIT licensed; see README.
+ * from `tree-sitter/tree-sitter-embedded-template`, MIT licensed.  See README.
  *
  * The reference implementation is `src/eml/eml.ml` in `camlworks/dream` --
  * `Tokenizer.scan` and its helpers -- not the prose in the Dream docs.  Where
@@ -30,7 +30,7 @@ export default grammar({
     $._template_start,
     // `[ ]*%%[options]\n` on a template's first line.
     $.template_options,
-    // `[ ]*%%…\n` inside a template; ends it.
+    // `[ ]*%%...\n` inside a template.  Ends it.
     $.template_end,
     // Zero-width.  Implicit end: a less-indented non-blank line, or EOF.
     $._template_dedent,

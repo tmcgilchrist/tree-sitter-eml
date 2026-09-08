@@ -58,8 +58,8 @@ static void consume_line(TSLexer *lexer) {
 // A run of top-level OCaml (or Reason) lines.  Stops before the line that
 // opens a template -- `%` in column 0, `[ ]*<`, or `[ ]*%%`, which is
 // `is_template_line` in eml.ml.  Note that any number of leading spaces will
-// do, zero included; the comment above that function claims two or more, but
-// the code does not, and the code is what dream_eml runs.
+// do, zero included.  The comment above that function claims two or more,
+// but the code does not, and the code is what dream_eml runs.
 //
 // The opening line's leading whitespace is left for the template to claim, so
 // `mark_end` is only ever called on a line boundary.
@@ -85,7 +85,7 @@ static bool scan_ocaml_block(TSLexer *lexer) {
       if (peek(lexer) == '%') {
         break;
       }
-      // A lone `%` behind whitespace is ordinary code; keep reading the line.
+      // A lone `%` behind whitespace is ordinary code.  Keep reading the line.
     }
 
     consume_line(lexer);
@@ -249,8 +249,8 @@ bool tree_sitter_eml_external_scanner_scan(void *payload, TSLexer *lexer,
     consumed = true;
     if (peek(lexer) == '%') {
       advance(lexer);
-      // On a template's first line this is the options line; anywhere else it
-      // terminates the template.  `template_options` is valid only in that
+      // On a template's first line this is the options line.  Anywhere else
+      // it terminates the template.  `template_options` is valid only in that
       // first position, which is how the two are told apart -- the same job
       // eml.ml's `first` flag does.
       if (valid_symbols[TEMPLATE_OPTIONS] || valid_symbols[TEMPLATE_END]) {
@@ -261,8 +261,8 @@ bool tree_sitter_eml_external_scanner_scan(void *payload, TSLexer *lexer,
       }
       return false;
     }
-    // A lone `%` behind whitespace is ordinary text; it has been consumed and
-    // the text scan picks up from there.
+    // A lone `%` behind whitespace is ordinary text.  It has been consumed
+    // and the text scan picks up from there.
   }
 
   // Blank lines never close a template, however far they are outdented (Q6).
