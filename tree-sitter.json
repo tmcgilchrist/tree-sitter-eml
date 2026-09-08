@@ -12,17 +12,6 @@
       ],
       "highlights": "queries/highlights.scm",
       "injections": "queries/injections.scm"
-    },
-    {
-      "name": "eml",
-      "camelcase": "Eml",
-      "scope": "source.eml.reason",
-      "path": ".",
-      "file-types": [
-        "eml.re"
-      ],
-      "highlights": "queries/highlights.scm",
-      "injections": "queries/injections-reason.scm"
     }
   ],
   "metadata": {

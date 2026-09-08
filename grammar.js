@@ -24,7 +24,7 @@ export default grammar({
   extras: () => [],
 
   externals: $ => [
-    // A run of top-level OCaml (or Reason) lines, up to a template-start line.
+    // A run of top-level code lines, up to a template-start line.
     $.ocaml_block,
     // Zero-width.  Records the template's indent in the scanner state.
     $._template_start,

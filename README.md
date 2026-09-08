@@ -23,22 +23,22 @@ lives in an external scanner, since it depends on the column and on the
 template's remembered indent.
 
 Queries inject OCaml into the code regions and HTML into the template text.
-There is a Reason variant of the injection query, but see the caveat below.
 
 ## Supported file types
 
-| Extension   | Embedded language        |
-|-------------|--------------------------|
-| `.eml.ml`   | OCaml                    |
-| `.eml.re`   | Reason                   |
-| `.eml.html` | OCaml or Reason, see below |
+`.eml.ml` and `.eml.html`, with OCaml as the embedded language.
 
+The template structure is the same whatever the code regions hold, so any eml
+file parses. Only the injection query is OCaml-specific. `dream_eml` can emit
+another language when the dune rule passes `--emit-reason`, and there is no
+injection query for that here. If you want one, open an issue or a PR.
+
+That flag is also why `.eml.html` cannot be decided from the extension.
 `dream_eml` picks the syntax from `Filename.extension`, which for
-`foo.eml.html` is `.html` and so falls through to OCaml unless the dune rule
-passes `--emit-reason`, and Dream ships one of each, `example/w-template-files`
-and `example/r-template-files`, under the same `template.eml.html` name. The
-extension therefore cannot decide it, and editors should default `.eml.html`
-to OCaml and let the user override.
+`foo.eml.html` is `.html` and so falls through to OCaml unless the rule says
+otherwise, and Dream ships one of each, `example/w-template-files` and
+`example/r-template-files`, under the same `template.eml.html` name. Editors
+should default `.eml.html` to OCaml and let the user override.
 
 Do not register this grammar for a bare `.eml` extension: that is RFC 5322
 email, already served by `tree-sitter-mail`.
@@ -161,20 +161,6 @@ tokens inside the `ERROR` node, so the surrounding OCaml still highlights.
 `neocaml-eml-mode` takes the simpler option and puts directive bodies in the
 same parser as everything else, one `treesit-range-rules` with no `:local t`.
 
-### Reason
-
-`queries/injections-reason.scm` is `injections.scm` with `reason` in place of
-`ocaml`, wired to the second `tree-sitter.json` entry, whose scope is
-`source.eml.reason`. Both entries name the same parser, `eml`. Only the scope
-and the injection query differ, which is how `tree-sitter-embedded-template`
-ships erb, ejs and etlua from one parser.
-
-Nothing resolves it today, so treat it as groundwork rather than a feature.
-`injection.language "reason"` is a name the editor looks up, and there is no
-Reason parser to find. The entry's `file-types` are also subject to the
-final-extension matching described above, so an editor has to route `.eml.re`
-to this scope itself.
-
 ## Development
 
 ```bash
@@ -242,4 +228,4 @@ indent boundary, which means changing the root node that every downstream query
 depends on.
 
 The zero-width `_template_start` / `_template_dedent` pair is the same device
-`tree-sitter-python` uses for indent and dedent.
+`tree-sitter-python` uses for indent and de-indent.

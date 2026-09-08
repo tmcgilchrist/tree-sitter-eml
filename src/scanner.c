@@ -55,7 +55,7 @@ static void consume_line(TSLexer *lexer) {
   }
 }
 
-// A run of top-level OCaml (or Reason) lines.  Stops before the line that
+// A run of top-level code lines.  Stops before the line that
 // opens a template -- `%` in column 0, `[ ]*<`, or `[ ]*%%`, which is
 // `is_template_line` in eml.ml.  Note that any number of leading spaces will
 // do, zero included.  The comment above that function claims two or more,
