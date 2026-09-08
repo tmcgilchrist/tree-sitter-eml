@@ -40,7 +40,7 @@ jobs:
       abi: ${{steps.read.outputs.abi}}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read versions from the Makefile
         id: read
@@ -82,7 +82,7 @@ jobs:
         os: [ubuntu-latest, macos-14, windows-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
@@ -120,7 +120,7 @@ jobs:
         os: [ubuntu-latest, macos-14, windows-latest]
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
@@ -138,7 +138,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
