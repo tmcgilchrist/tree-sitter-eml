@@ -1,0 +1,112 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+    paths:
+      - grammar.js
+      - src/**
+      - queries/**
+      - test/**
+      - bindings/**
+      - binding.gyp
+      - .github/workflows/ci.yml
+  pull_request:
+    paths:
+      - grammar.js
+      - src/**
+      - queries/**
+      - test/**
+      - bindings/**
+      - binding.gyp
+      - .github/workflows/ci.yml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{github.workflow}}-${{github.ref}}
+  cancel-in-progress: true
+
+env:
+  # Pinned so generated output cannot drift with upstream releases.
+  TREE_SITTER_VERSION: v0.27.0
+  TS_ABI_VERSION: '14'
+
+jobs:
+  test:
+    name: Test Parser
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+        with:
+          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+
+      - name: Report tree-sitter version
+        run: tree-sitter --version
+        shell: bash
+
+      - name: Run parser tests
+        uses: tree-sitter/parser-test-action@v3
+        with:
+          test-rust: ${{runner.os == 'Linux'}}
+          test-node: true
+          test-python: false
+          test-go: true
+          test-swift: false
+          # Node 20 bundles npm 10 / node-gyp 10, which does not recognise
+          # Visual Studio 2026 and so cannot build the node binding on the
+          # windows-2025-vs2026 runner.  Node 24 bundles npm 11.19 with
+          # node-gyp >= 12.1, which knows VS major version 18.  Node >= 22
+          # headers also require C++20, which needs tree-sitter >= 0.25.1 —
+          # 0.25.0's binding.gyp hardcodes C++17.
+          node-version: '24'
+          abi-version: ${{env.TS_ABI_VERSION}}
+
+  parse-examples:
+    name: Parse Examples
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-14, windows-latest]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+        with:
+          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+
+      - name: Parse example files
+        uses: tree-sitter/parse-action@v4
+        with:
+          files: test/files.txt
+
+  check-queries:
+    name: Check Queries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Set up tree-sitter
+        uses: tree-sitter/setup-action/cli@v2
+        with:
+          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+
+      - name: Compile every query against the grammar
+        run: |
+          for query in queries/*.scm; do
+            echo "== $query"
+            tree-sitter query "$query" \
+              test/files/dream/example/w-template-logic/template.eml.ml \
+              > /dev/null
+          done

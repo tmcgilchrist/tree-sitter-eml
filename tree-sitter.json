@@ -1,0 +1,42 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "eml",
+      "camelcase": "Eml",
+      "scope": "source.eml",
+      "path": ".",
+      "file-types": [
+        "eml.ml",
+        "eml.html"
+      ],
+      "highlights": "queries/highlights.scm",
+      "injections": "queries/injections.scm"
+    },
+    {
+      "name": "eml-reason",
+      "camelcase": "EmlReason",
+      "scope": "source.eml.reason",
+      "path": ".",
+      "file-types": [
+        "eml.re"
+      ],
+      "highlights": "queries/highlights.scm",
+      "injections": "queries/injections-reason.scm"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Dream Embedded ML (eml) grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "Tim McGilchrist",
+        "email": "timmcgil@gmail.com"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tmcgilchrist/tree-sitter-eml"
+    }
+  }
+}
