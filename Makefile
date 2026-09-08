@@ -7,6 +7,13 @@ SRC_DIR := src
 
 TS ?= tree-sitter
 
+# Toolchain versions.  This is the ONE place they are set.  CI reads them back
+# with `make ts-version` and `make abi-version`; `npm run generate` shells out
+# to `make generate`.  ABI 14 rather than the CLI default, because most Emacs
+# builds cannot load ABI 15 yet and neocaml consumes this grammar.
+TREE_SITTER_VERSION := v0.27.0
+TS_ABI_VERSION := 14
+
 # install directory layout
 PREFIX ?= /usr/local
 DATADIR ?= $(PREFIX)/share
@@ -76,7 +83,7 @@ $(SRC_DIR)/grammar.json: grammar.js
 	$(TS) generate --no-parser $^
 
 $(PARSER): $(SRC_DIR)/grammar.json
-	$(TS) generate $^
+	$(TS) generate --abi $(TS_ABI_VERSION) $^
 
 install: all
 	install -d '$(DESTDIR)$(DATADIR)'/tree-sitter/queries/eml '$(DESTDIR)$(INCLUDEDIR)'/tree_sitter '$(DESTDIR)$(PCLIBDIR)' '$(DESTDIR)$(LIBDIR)'
@@ -112,4 +119,14 @@ clean:
 test:
 	$(TS) test
 
-.PHONY: all install uninstall clean test
+generate:
+	$(TS) generate --abi $(TS_ABI_VERSION)
+
+# Read by the workflows so that the versions above are not duplicated in YAML.
+abi-version:
+	@echo $(TS_ABI_VERSION)
+
+ts-version:
+	@echo $(TREE_SITTER_VERSION)
+
+.PHONY: all install uninstall clean test generate abi-version ts-version

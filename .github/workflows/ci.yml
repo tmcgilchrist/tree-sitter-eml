@@ -20,20 +20,61 @@ on:
       - bindings/**
       - binding.gyp
       - .github/workflows/ci.yml
+      - Makefile
+      - package.json
   workflow_dispatch:
 
 concurrency:
   group: ${{github.workflow}}-${{github.ref}}
   cancel-in-progress: true
 
-env:
-  # Pinned so generated output cannot drift with upstream releases.
-  TREE_SITTER_VERSION: v0.27.0
-  TS_ABI_VERSION: '14'
-
 jobs:
+  versions:
+    # The Makefile is the single source of truth for the toolchain versions.
+    # Every other job reads them from here rather than repeating a literal.
+    # Runs on Linux so the matrix jobs need no `make` on Windows.
+    name: Resolve Versions
+    runs-on: ubuntu-latest
+    outputs:
+      tree-sitter: ${{steps.read.outputs.tree-sitter}}
+      abi: ${{steps.read.outputs.abi}}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Read versions from the Makefile
+        id: read
+        run: |
+          {
+            echo "tree-sitter=$(make ts-version)"
+            echo "abi=$(make abi-version)"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Check the copies that cannot be derived
+        run: |
+          set -eu
+          abi=$(make abi-version)
+          ts=$(make ts-version)
+
+          # devDependencies cannot reference the Makefile, so assert instead.
+          pinned=$(jq -r '.devDependencies["tree-sitter-cli"]' package.json)
+          if [ "$pinned" != "${ts#v}" ]; then
+            echo "package.json pins tree-sitter-cli $pinned, Makefile says $ts" >&2
+            exit 1
+          fi
+
+          # The committed parser is the artifact editors actually load; if it
+          # is not at the pinned ABI, Emacs cannot use it.
+          built=$(sed -n 's/#define LANGUAGE_VERSION //p' src/parser.c)
+          if [ "$built" != "$abi" ]; then
+            echo "src/parser.c is ABI $built, Makefile says $abi" >&2
+            echo "run 'npm run generate' and commit the result" >&2
+            exit 1
+          fi
+
   test:
     name: Test Parser
+    needs: versions
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -46,7 +87,7 @@ jobs:
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
         with:
-          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+          tree-sitter-ref: ${{needs.versions.outputs.tree-sitter}}
 
       - name: Report tree-sitter version
         run: tree-sitter --version
@@ -67,10 +108,11 @@ jobs:
           # headers also require C++20, which needs tree-sitter >= 0.25.1 —
           # 0.25.0's binding.gyp hardcodes C++17.
           node-version: '24'
-          abi-version: ${{env.TS_ABI_VERSION}}
+          abi-version: ${{needs.versions.outputs.abi}}
 
   parse-examples:
     name: Parse Examples
+    needs: versions
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -83,7 +125,7 @@ jobs:
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
         with:
-          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+          tree-sitter-ref: ${{needs.versions.outputs.tree-sitter}}
 
       - name: Parse example files
         uses: tree-sitter/parse-action@v4
@@ -92,6 +134,7 @@ jobs:
 
   check-queries:
     name: Check Queries
+    needs: versions
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -100,7 +143,7 @@ jobs:
       - name: Set up tree-sitter
         uses: tree-sitter/setup-action/cli@v2
         with:
-          tree-sitter-ref: ${{env.TREE_SITTER_VERSION}}
+          tree-sitter-ref: ${{needs.versions.outputs.tree-sitter}}
 
       - name: Compile every query against the grammar
         run: |

@@ -39,7 +39,7 @@
     "eslint-config-treesitter": "^1.0.2",
     "prebuildify": "^6.0.1",
     "tree-sitter": "^0.25.0",
-    "tree-sitter-cli": "^0.26.7"
+    "tree-sitter-cli": "0.27.0"
   },
   "peerDependencies": {
     "tree-sitter": "^0.25.0"
@@ -51,7 +51,7 @@
   },
   "scripts": {
     "install": "node-gyp-build",
-    "generate": "tree-sitter generate --abi 14",
+    "generate": "make generate",
     "lint": "eslint grammar.js",
     "prebuildify": "prebuildify --napi --strip",
     "prestart": "tree-sitter build --wasm",

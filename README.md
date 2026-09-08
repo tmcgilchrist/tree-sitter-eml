@@ -114,13 +114,16 @@ Nothing published to package repositories just yet.
 git clone https://github.com/tmcgilchrist/tree-sitter-eml
 cd tree-sitter-eml
 npm install
-npm run generate      # tree-sitter generate --abi 14
+npm run generate      # make generate, at the pinned ABI
 tree-sitter test
 ```
 
 The committed `src/parser.c` is ABI 14 on purpose: most Emacs builds cannot
-load ABI 15 yet. Regenerate with `npm run generate`, not a bare
-`tree-sitter generate`.
+load ABI 15 yet. Regenerate with `npm run generate` or `make generate`, not a
+bare `tree-sitter generate`, which would use the CLI default.
+
+The CLI and ABI versions are set in the `Makefile` (`TREE_SITTER_VERSION` and
+`TS_ABI_VERSION`); everything else reads them from there.
 
 ## Usage
 
@@ -150,7 +153,7 @@ is an expression; splicing it into the statement stream would land it inside a
 ## Development
 
 ```bash
-npm run generate                     # regenerate src/parser.c at ABI 14
+npm run generate                     # regenerate at the pinned ABI
 tree-sitter test                     # corpus tests
 tree-sitter parse -q $(cat test/files.txt)   # the vendored Dream corpus
 npm run lint                         # eslint on grammar.js
